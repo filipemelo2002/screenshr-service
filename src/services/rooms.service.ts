@@ -12,8 +12,12 @@ export class RoomsService {
   async createRoom({ owner }: CreateRoomRequest) {
     const room = new Room({
       owner,
-      users: [],
+      users: [owner],
     });
-    await this.roomsRepository.create(room);
+    const response = await this.roomsRepository.create(room);
+
+    return {
+      room: response,
+    };
   }
 }

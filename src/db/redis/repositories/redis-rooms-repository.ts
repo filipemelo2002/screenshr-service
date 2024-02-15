@@ -6,7 +6,8 @@ import { RoomsRepository } from 'src/repositories/rooms.repository';
 export class RedisRoomsRepository implements RoomsRepository {
   rooms: Room[] = [];
 
-  async create(room: Room): Promise<void> {
+  async create(room: Room): Promise<Room> {
     this.rooms.push(room);
+    return room;
   }
 }
