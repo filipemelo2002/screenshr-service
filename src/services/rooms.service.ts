@@ -5,6 +5,10 @@ import { RoomsRepository } from 'src/repositories/rooms.repository';
 interface CreateRoomRequest {
   owner: string;
 }
+interface JoinRoomRequest {
+  userId: string;
+  roomId: string;
+}
 @Injectable()
 export class RoomsService {
   constructor(private roomsRepository: RoomsRepository) {}
@@ -18,6 +22,17 @@ export class RoomsService {
 
     return {
       room: response,
+    };
+  }
+
+  async joinRoom({ userId, roomId }: JoinRoomRequest) {
+    const room = await this.roomsRepository.findOne(roomId);
+
+    room.users.push(userId);
+
+    await this.roomsRepository.update(room);
+    return {
+      room,
     };
   }
 }

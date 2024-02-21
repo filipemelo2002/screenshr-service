@@ -23,4 +23,13 @@ export class UsersService {
       user: response,
     };
   }
+
+  async findManyByIds(ids: string[]) {
+    const users = [];
+    for (const id of ids) {
+      const user = await this.usersRepository.findById(id);
+      users.push(user);
+    }
+    return users;
+  }
 }

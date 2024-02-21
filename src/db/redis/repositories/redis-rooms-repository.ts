@@ -10,4 +10,14 @@ export class RedisRoomsRepository implements RoomsRepository {
     this.rooms.push(room);
     return room;
   }
+
+  async findOne(id: string): Promise<Room> {
+    return this.rooms.find((room) => room.id === id);
+  }
+
+  async update(room: Room): Promise<Room> {
+    const roomIndex = this.rooms.findIndex((roomAux) => roomAux.id === room.id);
+    this.rooms[roomIndex] = room;
+    return room;
+  }
 }
