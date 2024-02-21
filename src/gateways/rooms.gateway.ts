@@ -7,6 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { RoomsService } from 'src/services/rooms.service';
 import { UsersService } from 'src/services/users.service';
+import { ROOM_EVENTS } from 'src/utils/room-events';
 
 interface JoinRoomRequest {
   nickname: string;
@@ -23,14 +24,14 @@ export class RoomsGateway {
     private userService: UsersService,
   ) {}
 
-  @SubscribeMessage('room/create')
+  @SubscribeMessage(ROOM_EVENTS.CREATE_ROOM)
   handleMessage(client: any, payload: any): string {
     this.logger.log(`Receiving message from user ${client.id}`);
     this.logger.log(payload);
     return 'Hello world!';
   }
 
-  @SubscribeMessage('room/join')
+  @SubscribeMessage(ROOM_EVENTS.JOIN_ROOM)
   async handleOnJoinRoom(client: any, @MessageBody() data: JoinRoomRequest) {
     const { user } = await this.userService.createUser({
       id: client.id,
@@ -45,7 +46,7 @@ export class RoomsGateway {
 
     const users = await this.userService.findManyByIds(room.users);
 
-    this.server.emit('room/updade-users', {
+    this.server.emit(ROOM_EVENTS.UPDATE_USERS, {
       users,
     });
   }
