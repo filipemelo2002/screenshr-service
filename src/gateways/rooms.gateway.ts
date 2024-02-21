@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import {
+  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -32,7 +33,10 @@ export class RoomsGateway {
   }
 
   @SubscribeMessage(ROOM_EVENTS.JOIN_ROOM)
-  async handleOnJoinRoom(client: any, @MessageBody() data: JoinRoomRequest) {
+  async handleOnJoinRoom(
+    @ConnectedSocket() client: any,
+    @MessageBody() data: JoinRoomRequest,
+  ) {
     const { user } = await this.userService.createUser({
       id: client.id,
       color: data.color,

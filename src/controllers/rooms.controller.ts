@@ -1,8 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { RoomsService } from './rooms.service';
 import { CreateRoomBody } from 'src/dtos/create-room-body';
-import { UsersService } from './users.service';
 import { RoomViewModel } from 'src/view-models/room-view-model';
+import { UsersService } from 'src/services/users.service';
+import { RoomsService } from 'src/services/rooms.service';
+import { UserViewModel } from 'src/view-models/user-view-model';
 
 @Controller('rooms')
 export class RoomsController {
@@ -22,7 +23,7 @@ export class RoomsController {
 
     return {
       room: RoomViewModel.toHTTP(room),
-      user,
+      user: UserViewModel.toHTTP(user),
     };
   }
 }

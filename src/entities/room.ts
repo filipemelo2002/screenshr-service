@@ -10,7 +10,7 @@ export class Room {
 
   constructor(props: RoomProps, id?: string) {
     this.props = props;
-    this._id = id || this.generateId(6);
+    this._id = id || this.generateId(5).toLocaleLowerCase();
   }
 
   get id() {

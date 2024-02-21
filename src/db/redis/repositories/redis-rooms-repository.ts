@@ -12,7 +12,7 @@ export class RedisRoomsRepository implements RoomsRepository {
   }
 
   async findOne(id: string): Promise<Room> {
-    return this.rooms.find((room) => room.id === id);
+    return this.rooms.find((room) => room.id === id.toLocaleLowerCase());
   }
 
   async update(room: Room): Promise<Room> {
