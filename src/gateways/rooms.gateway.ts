@@ -9,6 +9,7 @@ import {
 import { RoomsService } from 'src/services/rooms.service';
 import { UsersService } from 'src/services/users.service';
 import { ROOM_EVENTS } from 'src/utils/room-events';
+import { UserViewModel } from 'src/view-models/user-view-model';
 
 interface JoinRoomRequest {
   nickname: string;
@@ -51,7 +52,7 @@ export class RoomsGateway {
     const users = await this.userService.findManyByIds(room.users);
 
     this.server.emit(ROOM_EVENTS.UPDATE_USERS, {
-      users,
+      users: users.map(UserViewModel.toHTTP),
     });
   }
 }
