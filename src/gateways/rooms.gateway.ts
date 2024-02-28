@@ -9,6 +9,7 @@ import {
 import { RoomsService } from 'src/services/rooms.service';
 import { UsersService } from 'src/services/users.service';
 import { ROOM_EVENTS } from 'src/utils/room-events';
+import { RoomViewModel } from 'src/view-models/room-view-model';
 import { UserViewModel } from 'src/view-models/user-view-model';
 
 interface JoinRoomRequest {
@@ -54,5 +55,10 @@ export class RoomsGateway {
     this.server.emit(ROOM_EVENTS.UPDATE_USERS, {
       users: users.map(UserViewModel.toHTTP),
     });
+
+    return {
+      room: RoomViewModel.toHTTP(room),
+      users: users.map(UserViewModel.toHTTP),
+    };
   }
 }
