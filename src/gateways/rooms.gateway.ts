@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -17,10 +16,15 @@ interface JoinRoomRequest {
   color: string;
   roomId: string;
 }
+
+interface CreateRoomRequest {
+  nickname: string;
+  color: string;
+}
+
 @WebSocketGateway()
 export class RoomsGateway {
   @WebSocketServer() private server: any;
-  private readonly logger = new Logger(RoomsGateway.name);
 
   constructor(
     private roomsService: RoomsService,
@@ -28,10 +32,26 @@ export class RoomsGateway {
   ) {}
 
   @SubscribeMessage(ROOM_EVENTS.CREATE_ROOM)
-  handleMessage(client: any, payload: any): string {
-    this.logger.log(`Receiving message from user ${client.id}`);
-    this.logger.log(payload);
-    return 'Hello world!';
+  async hanleOnCreateRoom(
+    @ConnectedSocket() client: any,
+    @MessageBody() data: CreateRoomRequest,
+  ) {
+    const { user } = await this.userService.createUser({
+      id: client.id,
+      color: data.color,
+      nickname: data.nickname,
+    });
+
+    const { room } = await this.roomsService.createRoom({
+      owner: client.id,
+    });
+
+    client.join(room.id);
+
+    return {
+      user: UserViewModel.toHTTP(user),
+      room: RoomViewModel.toHTTP(room),
+    };
   }
 
   @SubscribeMessage(ROOM_EVENTS.JOIN_ROOM)
@@ -52,9 +72,11 @@ export class RoomsGateway {
 
     const users = await this.userService.findManyByIds(room.users);
 
-    this.server.emit(ROOM_EVENTS.UPDATE_USERS, {
+    this.server.to(room.id).emit(ROOM_EVENTS.UPDATE_USERS, {
       users: users.map(UserViewModel.toHTTP),
     });
+
+    client.join(room.id);
 
     return {
       room: RoomViewModel.toHTTP(room),
