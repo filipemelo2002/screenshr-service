@@ -5,6 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { UserNotInRoom } from 'src/errors/user-not-in-room';
 import { RoomsService } from 'src/services/rooms.service';
 import { UsersService } from 'src/services/users.service';
 import { ROOM_EVENTS } from 'src/utils/room-events';
@@ -12,8 +13,6 @@ import { RoomViewModel } from 'src/view-models/room-view-model';
 import { UserViewModel } from 'src/view-models/user-view-model';
 
 interface JoinRoomRequest {
-  nickname: string;
-  color: string;
   roomId: string;
 }
 
@@ -59,16 +58,11 @@ export class RoomsGateway {
     @ConnectedSocket() client: any,
     @MessageBody() data: JoinRoomRequest,
   ) {
-    const { user } = await this.userService.createUser({
-      id: client.id,
-      color: data.color,
-      nickname: data.nickname,
-    });
+    const { room } = await this.roomsService.findRoom(data.roomId);
 
-    const { room } = await this.roomsService.joinRoom({
-      userId: user.id,
-      roomId: data.roomId,
-    });
+    if (!room.users.includes(client.id)) {
+      throw new UserNotInRoom();
+    }
 
     const users = await this.userService.findManyByIds(room.users);
 
