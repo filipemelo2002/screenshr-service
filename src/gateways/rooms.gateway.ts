@@ -68,6 +68,7 @@ export class RoomsGateway {
 
     this.server.to(room.id).emit(ROOM_EVENTS.UPDATE_USERS, {
       users: users.map(UserViewModel.toHTTP),
+      newUserId: client.id,
     });
 
     client.join(room.id);
