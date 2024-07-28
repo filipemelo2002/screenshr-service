@@ -5,6 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { NotPartyOwner } from 'src/errors/not-party-owner';
 import { UserNotInRoom } from 'src/errors/user-not-in-room';
 import { RoomsService } from 'src/services/rooms.service';
 import { UsersService } from 'src/services/users.service';
@@ -19,6 +20,12 @@ interface JoinRoomRequest {
 interface CreateRoomRequest {
   nickname: string;
   color: string;
+}
+
+interface SendOfferRequest {
+  id: string;
+  offer: RTCSessionDescriptionInit;
+  roomId: string;
 }
 
 @WebSocketGateway()
@@ -77,5 +84,28 @@ export class RoomsGateway {
       room: RoomViewModel.toHTTP(room),
       users: users.map(UserViewModel.toHTTP),
     };
+  }
+
+  @SubscribeMessage(ROOM_EVENTS.SEND_OFFER)
+  async handleOnSendOffer(
+    @ConnectedSocket() client: any,
+    @MessageBody() data: SendOfferRequest,
+  ) {
+    const { room } = await this.roomsService.findRoom(data.roomId);
+
+    if (!room.users.includes(client.id) || !room.users.includes(data.id)) {
+      throw new UserNotInRoom();
+    }
+
+    const isAdmin = room.owner === client.id;
+
+    if (!isAdmin) {
+      throw new NotPartyOwner();
+    }
+
+    this.server.to(data.id).emit(ROOM_EVENTS.RECEIVE_OFFER, {
+      offer: data.offer,
+      id: client.id,
+    });
   }
 }
