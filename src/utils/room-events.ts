@@ -4,4 +4,6 @@ export const ROOM_EVENTS = {
   UPDATE_USERS: 'room/update-users',
   SEND_OFFER: 'offer/send',
   RECEIVE_OFFER: 'offer/receive',
+  SEND_ANSWER: 'answer/send',
+  RECEIVE_ANSWER: 'answer/receive',
 };

@@ -23,8 +23,14 @@ interface CreateRoomRequest {
 }
 
 interface SendOfferRequest {
-  id: string;
+  to: string;
   offer: RTCSessionDescriptionInit;
+  roomId: string;
+}
+
+interface SendAnswerRequest {
+  to: string;
+  answer: RTCSessionDescriptionInit;
   roomId: string;
 }
 
@@ -93,7 +99,7 @@ export class RoomsGateway {
   ) {
     const { room } = await this.roomsService.findRoom(data.roomId);
 
-    if (!room.users.includes(client.id) || !room.users.includes(data.id)) {
+    if (!room.users.includes(client.id) || !room.users.includes(data.to)) {
       throw new UserNotInRoom();
     }
 
@@ -103,8 +109,25 @@ export class RoomsGateway {
       throw new NotPartyOwner();
     }
 
-    this.server.to(data.id).emit(ROOM_EVENTS.RECEIVE_OFFER, {
+    this.server.to(data.to).emit(ROOM_EVENTS.RECEIVE_OFFER, {
       offer: data.offer,
+      id: client.id,
+    });
+  }
+
+  @SubscribeMessage(ROOM_EVENTS.SEND_ANSWER)
+  async handleOnSendAnswer(
+    @ConnectedSocket() client: any,
+    @MessageBody() data: SendAnswerRequest,
+  ) {
+    const { room } = await this.roomsService.findRoom(data.roomId);
+
+    if (!room.users.includes(client.id) || !room.users.includes(data.to)) {
+      throw new UserNotInRoom();
+    }
+
+    this.server.to(data.to).emit(ROOM_EVENTS.RECEIVE_ANSWER, {
+      answer: data.answer,
       id: client.id,
     });
   }
