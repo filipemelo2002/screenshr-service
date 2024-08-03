@@ -34,6 +34,11 @@ interface SendAnswerRequest {
   roomId: string;
 }
 
+interface SendCandidateRequest {
+  to: string;
+  roomId: string;
+  candidate: RTCIceCandidate;
+}
 @WebSocketGateway()
 export class RoomsGateway {
   @WebSocketServer() private server: any;
@@ -128,6 +133,23 @@ export class RoomsGateway {
 
     this.server.to(data.to).emit(ROOM_EVENTS.RECEIVE_ANSWER, {
       answer: data.answer,
+      id: client.id,
+    });
+  }
+
+  @SubscribeMessage(ROOM_EVENTS.SEND_CANDIDATE)
+  async handleOnSendCandidate(
+    @ConnectedSocket() client: any,
+    @MessageBody() data: SendCandidateRequest,
+  ) {
+    const { room } = await this.roomsService.findRoom(data.roomId);
+
+    if (!room.users.includes(client.id) || !room.users.includes(data.to)) {
+      throw new UserNotInRoom();
+    }
+
+    this.server.to(data.to).emit(ROOM_EVENTS.RECEIVE_CANDIDATE, {
+      candidate: data.candidate,
       id: client.id,
     });
   }

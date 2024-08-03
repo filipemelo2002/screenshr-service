@@ -6,4 +6,6 @@ export const ROOM_EVENTS = {
   RECEIVE_OFFER: 'offer/receive',
   SEND_ANSWER: 'answer/send',
   RECEIVE_ANSWER: 'answer/receive',
+  SEND_CANDIDATE: 'candidate/send',
+  RECEIVE_CANDIDATE: 'candidate/receive',
 };
